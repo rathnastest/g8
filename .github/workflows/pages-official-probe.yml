@@ -1,0 +1,19 @@
+name: pages-official-probe
+on: [workflow_dispatch]
+permissions:
+  id-token: write
+  pages: write
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - run: mkdir -p site && echo '<h1>official probe</h1>' > site/index.html
+      - uses: actions/upload-pages-artifact@v3
+        with: { path: site }
+      - id: deployment
+        uses: actions/deploy-pages@v4
+      - run: echo "PROBE official page_url=${{ steps.deployment.outputs.page_url }}"
