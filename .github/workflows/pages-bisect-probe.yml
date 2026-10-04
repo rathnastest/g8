@@ -1,0 +1,38 @@
+name: pages-bisect-probe
+on: [workflow_dispatch]
+permissions:
+  id-token: write
+  pages: write
+  contents: read
+jobs:
+  v1:
+    runs-on: ubuntu-latest
+    environment: github-pages
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with: { name: probe-v1, path: probe/v1-mtime0-noname-nodirs.tar }
+      - uses: actions/deploy-pages@v4
+        with: { artifact_name: probe-v1 }
+  v2:
+    needs: v1
+    if: always()
+    runs-on: ubuntu-latest
+    environment: github-pages
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with: { name: probe-v2, path: probe/v2-mtimenow-noname-nodirs.tar }
+      - uses: actions/deploy-pages@v4
+        with: { artifact_name: probe-v2 }
+  v3:
+    needs: v2
+    if: always()
+    runs-on: ubuntu-latest
+    environment: github-pages
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with: { name: probe-v3, path: probe/v3-mtime0-root-dirs.tar }
+      - uses: actions/deploy-pages@v4
+        with: { artifact_name: probe-v3 }
