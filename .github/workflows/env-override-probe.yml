@@ -1,0 +1,13 @@
+name: env-override-probe
+on: [workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          GITHUB_WORKFLOW_SHA: override-value
+          GALA_PROBE: plain-value
+        run: |
+          echo "PROBE GITHUB_WORKFLOW_SHA=$GITHUB_WORKFLOW_SHA GALA_PROBE=$GALA_PROBE GITHUB_SHA=$GITHUB_SHA"
