@@ -1,0 +1,8 @@
+name: caller-claims
+on: [workflow_dispatch]
+permissions:
+  id-token: write
+  contents: read
+jobs:
+  call:
+    uses: rathnastest/g8/.github/workflows/reusable-claims.yml@361a032cc299b9bfa46497951276e6bf99227f37
