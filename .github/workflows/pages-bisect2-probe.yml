@@ -1,0 +1,27 @@
+name: pages-bisect2-probe
+on: [workflow_dispatch]
+permissions:
+  id-token: write
+  pages: write
+  contents: read
+jobs:
+  v4:
+    runs-on: ubuntu-latest
+    environment: github-pages
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with: { name: probe-v4, path: probe/v4-noname-dirs.tar }
+      - uses: actions/deploy-pages@v4
+        with: { artifact_name: probe-v4 }
+  v5:
+    needs: v4
+    if: always()
+    runs-on: ubuntu-latest
+    environment: github-pages
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with: { name: probe-v5, path: probe/v5-root-nodirs.tar }
+      - uses: actions/deploy-pages@v4
+        with: { artifact_name: probe-v5 }
