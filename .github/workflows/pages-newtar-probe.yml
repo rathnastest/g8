@@ -1,0 +1,16 @@
+name: pages-newtar-probe
+on: [workflow_dispatch]
+permissions:
+  id-token: write
+  pages: write
+  contents: read
+jobs:
+  ourtar:
+    runs-on: ubuntu-latest
+    environment: github-pages
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with: { name: probe-newtar, path: probe/new-carrier.tar }
+      - uses: actions/deploy-pages@v4
+        with: { artifact_name: probe-newtar }
