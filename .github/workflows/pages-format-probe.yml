@@ -1,0 +1,28 @@
+name: pages-format-probe
+on: [workflow_dispatch]
+permissions:
+  id-token: write
+  pages: write
+  contents: read
+concurrency: pages-format-probe
+jobs:
+  gzip-raw:
+    runs-on: ubuntu-latest
+    environment: github-pages
+    steps:
+      - run: mkdir -p site && echo '<h1>gzip raw</h1>' > site/index.html && tar -czf carrier.tgz -C site .
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with: { name: probe-gzip-raw, path: carrier.tgz, archive: false }
+      - uses: actions/deploy-pages@v4
+        with: { artifact_name: probe-gzip-raw }
+  tar-raw:
+    needs: gzip-raw
+    if: always()
+    runs-on: ubuntu-latest
+    environment: github-pages
+    steps:
+      - run: mkdir -p site && echo '<h1>tar raw</h1>' > site/index.html && tar -cf artifact.tar -C site .
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with: { name: probe-tar-raw, path: artifact.tar, archive: false }
+      - uses: actions/deploy-pages@v4
+        with: { artifact_name: probe-tar-raw }
