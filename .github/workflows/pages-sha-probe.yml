@@ -1,0 +1,31 @@
+name: pages-sha-probe
+on: [workflow_dispatch]
+permissions:
+  id-token: write
+  pages: write
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    environment: github-pages
+    steps:
+      - run: |
+          mkdir -p site && echo '<h1>sha probe</h1>' > site/index.html
+          tar -czf carrier.tgz -C site .
+      - id: raw
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with: { name: gala-pages-probe, path: carrier.tgz, archive: false }
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          RAW: ${{ steps.raw.outputs.artifact-id }}
+        run: |
+          node -e '
+            const idRes = await fetch(process.env.ACTIONS_ID_TOKEN_REQUEST_URL + "&audience=" + encodeURIComponent("https://github.com/" + process.env.GITHUB_REPOSITORY_OWNER), { headers: { authorization: "bearer " + process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN } });
+            const oidc = (await idRes.json()).value;
+            const cases = [["raw-gzip+GITHUB_SHA", process.env.RAW, process.env.GITHUB_SHA], ["raw-gzip+fake", process.env.RAW, "4".repeat(40)]];
+            for (const [label, id, ver] of cases) {
+              const r = await fetch("https://api.github.com/repos/" + process.env.GITHUB_REPOSITORY + "/pages/deployments", { method: "POST", headers: { authorization: "Bearer " + process.env.GH_TOKEN, accept: "application/vnd.github+json", "x-github-api-version": "2022-11-28", "content-type": "application/json" }, body: JSON.stringify({ artifact_id: Number(id), pages_build_version: ver, oidc_token: oidc }) });
+              const body = await r.text();
+              console.log("PROBE", label, "status=" + r.status, body.replace(/[A-Za-z0-9_-]{40,}/g, "<redacted>").slice(0, 220));
+            }
+          '
