@@ -1,0 +1,19 @@
+name: reusable-claims
+on: [workflow_call]
+permissions:
+  id-token: write
+  contents: read
+jobs:
+  claims:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          node -e '
+            const r = await fetch(process.env.ACTIONS_ID_TOKEN_REQUEST_URL, { headers: { authorization: "bearer " + process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN } });
+            const t = (await r.json()).value;
+            const c = JSON.parse(Buffer.from(t.split(".")[1], "base64url").toString());
+            console.log("CLAIM job_workflow_ref=" + c.job_workflow_ref);
+            console.log("CLAIM job_workflow_sha=" + c.job_workflow_sha);
+            console.log("CLAIM workflow_ref=" + c.workflow_ref);
+            console.log("CLAIM sha=" + c.sha + " env_GITHUB_SHA=" + process.env.GITHUB_SHA);
+          '
